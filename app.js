@@ -463,7 +463,7 @@ function showProfile() {
     <div class="pf-note">Тест ничего не сохраняет на сервер — это только твоя картинка уровня.</div>
     <div class="lk-sign" style="margin-top:22px;justify-content:center">
       <span class="lk-badge lk-badge-l">Λ</span>
-      <span class="lk-badge lk-badge-di">Di</span>
+      <span class="lk-badge lk-badge-d"><span>D<span class="lk-dot">.</span></span></span>
     </div>
     <div style="height:28px"></div>`;
   pf.classList.add('show');

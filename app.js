@@ -57,6 +57,34 @@ function fracSum(list) {
   const g = gcd(n, d); return [n / g, d / g];
 }
 
+/* ── ОТЧЁТ (#38) ─────────────────────────────────────────────────────────── */
+const HW_ENDPOINT = 'https://194-87-110-53.nip.io/hw-result';
+const LEAD_CODE = Math.random().toString(36).slice(2, 6).toUpperCase();
+let reported = false;
+
+function reportResults() {
+  if (reported) return;
+  if (!/github\.io$/i.test(location.hostname)) return;
+  if (new URLSearchParams(location.search).has('nosend')) return;
+  reported = true;
+  const tasks = DATA.tasks;
+  const score = tasks.filter(t => answers[t.id] && answers[t.id].ok).length;
+  const errors = tasks
+    .map((t, i) => answers[t.id] && !answers[t.id].ok ? `№${i + 1} ${t.station}` : null)
+    .filter(Boolean);
+  const detail = tasks.map((t, i) => {
+    const a = answers[t.id] || {};
+    return { n: i + 1, theme: t.station, cond: t.cond, ok: !!a.ok, diag: a.diag || '' };
+  });
+  try {
+    fetch(HW_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: LEAD_CODE, hw: 'Входной тест ОГЭ 8→9', hw_id: '89-vhod-test', score, total: tasks.length, errors, detail }),
+      keepalive: true
+    }).catch(() => {});
+  } catch (e) {}
+}
+
 /* ── СОСТОЯНИЕ ────────────────────────────────────────────────────────────── */
 let DATA = null;
 let idx = 0;
@@ -460,10 +488,10 @@ function showProfile() {
     ${summerHtml}
     <button class="lk-btn cta-btn" id="cta">${DATA.cta.label}</button>
     ${DATA.cta.note ? `<div class="pf-note" style="margin-top:10px">${DATA.cta.note}</div>` : ''}
-    <div class="pf-note">Тест ничего не сохраняет на сервер — это только твоя картинка уровня.</div>
+    <div class="pf-note">Тест не хранит твои личные данные — только анонимный код и результат.</div>
     <div class="lk-sign" style="margin-top:22px;justify-content:center">
       <span class="lk-badge lk-badge-l">Λ</span>
-      <span class="lk-badge lk-badge-d">D.</span>
+      <span class="lk-badge lk-badge-di">Di</span>
     </div>
     <div style="height:28px"></div>`;
   pf.classList.add('show');
@@ -476,5 +504,5 @@ function showProfile() {
     if (rev) rev.classList.toggle('open');
   }));
 
-  document.getElementById('cta').addEventListener('click', () => window.open(DATA.cta.url, '_blank'));
+  document.getElementById('cta').addEventListener('click', () => { reportResults(); window.open(DATA.cta.url, '_blank'); });
 }
